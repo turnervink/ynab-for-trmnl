@@ -1,0 +1,2 @@
+@start-plugin:
+	./bin/serve
