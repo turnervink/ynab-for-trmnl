@@ -1,8 +1,5 @@
 tmp/
 .DS_Store
 
-node_modules
-dist
-
 .env
-
+config.toml
