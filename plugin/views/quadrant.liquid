@@ -1,3 +1,102 @@
 <div class="layout">
-    <span class="title">Hello, quadrant world!</span>
+  {% assign showCategories = trmnl.plugin_settings.custom_fields_values.categories_to_show | split: "," %}
+
+  {% if data.category_groups.size > 0 %}
+  <div class="grid grid--cols-3">
+    {% assign displayed = 0 %}
+    {% for group in data.category_groups %}
+    {% for category in group.categories %}
+    {% if showCategories contains category.id %}
+    {% unless displayed >= 9 %}
+    {% assign displayed = displayed | plus: 1 %}
+
+    {% assign categoryName = category.name %}
+
+    {% assign balance = category.balance | times: 1.0 %}
+    {% assign activity = category.activity | times: 1.0 %}
+    {% assign spent = activity | times: -1 %}
+
+    {% assign hasGoal = category.goal_type != null %}
+    {% assign goalCadence = category.goal_cadence %}
+    {% assign goalDay = category.goal_day %}
+    {% assign goalPctComplete = category.goal_percentage_complete %}
+    {% assign goalOverallFunded = category.goal_overall_funded | times: 1.0 %}
+    {% assign goalUnderFunded = category.goal_under_funded | times: 1.0 %}
+    {% assign goalOverallLeft = category.goal_overall_left | times: 1.0 %}
+
+    {% if hasGoal %}
+    {% comment %}
+    If there's a goal we need to use the overall funded to know now 
+    much is available in order to account for funding in previous months 
+    {% endcomment %}
+    {% assign funded = goalOverallFunded %}
+    {% else %}
+    {% assign funded = balance %}
+    {% endif %}
+
+    {% assign spentPct = spent | divided_by: funded | times: 100 %}
+
+    {% assign barSegments = 100 | divided_by: category.barSegments %}
+
+    <div>
+      <span class="label label--inverted label--small" >{{ categoryName }}</span>
+      <span class="value value--tnums value--small" data-value-type="number" data-fit-value="true">{{ balance | divided_by: 1000 | number_to_currency }}</span>
+    </div>
+    {% endunless %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="layout--grid grid--cols-3">
+    <div class="label label--medium label--inverted" style="text-align: center;">No data to display</div>
+    <div style="height:10px;"></div>
+    <p class="text--left" style="text-align: center;">Set the IDs of the categories you want to see here in the plugin settings</p>
+    <p class="text--left" style="text-align: center;">Ensure you have set the polling URL with your budget ID and YNAB access token</p>
+  </div>     
+  {% endif %}
 </div>
+
+<div class="title_bar">
+  <img class="image" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTc2IiBoZWlnaHQ9IjU2OSIgdmlld0JveD0iMCAwIDU3NiA1NjkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00NjQuNDkzIDI2MC4zMzRIMzU5LjI1NUMzNTcuMDIyIDI2MC4zMzQgMzU0LjIzNiAyNjEuODc4IDM1My4wNzggMjYzLjc2NUwyOTAuMDExIDM2Ni40MzVDMjg4Ljg1NCAzNjguMzIzIDI4Ni45NjkgMzY4LjMxMyAyODUuODEyIDM2Ni40MzVMMjIzLjQxMSAyNjMuNzg2QzIyMi4yNjQgMjYxLjg5OCAyMTkuNDg4IDI2MC4zNDQgMjE3LjI1NSAyNjAuMzQ0SDExMS41MjZDMTA5LjI5MyAyNjAuMzQ0IDEwOC40NzMgMjYxLjgzOCAxMDkuNzIzIDI2My42NzVMMjM0LjM5MiA0NDYuOTkyQzIzNS42NDEgNDQ4LjgxOSAyMzYuNjU1IDQ1Mi4xMjkgMjM2LjY1NSA0NTQuMzNWNTY0LjM3N0MyMzYuNjU1IDU2Ni41NzcgMjM4LjQ4OSA1NjguMzgzIDI0MC43MjIgNTY4LjM4M0gzMzUuMjU1QzMzNy40ODggNTY4LjM4MyAzMzkuMzIyIDU2Ni41NzcgMzM5LjMyMiA1NjQuMzc3VjQ1NC4zM0MzMzkuMzIyIDQ1Mi4xMjkgMzQwLjM0NiA0NDguODE5IDM0MS41ODYgNDQ2Ljk5Mkw0NjYuMjg1IDI2My42NzVDNDY3LjUzNSAyNjEuODQ4IDQ2Ni43MTUgMjYwLjM0NCA0NjQuNDgyIDI2MC4zNDRMNDY0LjQ5MyAyNjAuMzM0WiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMjgwLjc3NSAxMDEuNzMyQzI4My41MjEgMTAzLjIzNiAyODYuMTg0IDEwNC40NTcgMjg3LjU4NyAxMDQuNDU3QzI4OC45OSAxMDQuNDU3IDI5MS4zNDcgMTAzLjYyIDI5NC4zNzkgMTAxLjczMkMzNTMuOTgzIDY0LjExOCAzMDQuMzg2IDE3Ljk1NTYgMjg3LjU4NyAwLjU2NjQwNkMyNzAuNzc4IDE3Ljk1NTYgMjIxLjE4MSA2NC4xMTggMjgwLjc3NSAxMDEuNzMyWiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMjE4LjA4OSAyMzguOTQ3QzIyMS40OCAyMzguNjc1IDIyNC42MjQgMjM4LjIwMSAyMjUuODg0IDIzNy4zNjNDMjI3LjE1NCAyMzYuNTI1IDIyOC43NjMgMjM0LjM4NiAyMzAuMzQgMjMwLjg4NEMyNjEuMDkgMTYxLjY5IDE4OC4yNDEgMTQ5LjQ3OSAxNjIuNDkgMTQzLjc1NkMxNTcuOTUyIDE2OS4zODEgMTQxLjQ0IDI0MC4zNSAyMTguMDg5IDIzOC45MzdWMjM4Ljk0N1oiIGZpbGw9IiMzQjVFREEiLz4KPHBhdGggZD0iTTEyMC40NCAyMjMuODM2QzEyMy4zMDggMjIyLjAyOSAxMjUuODU4IDIyMC4xNzIgMTI2LjU4NSAyMTguODVDMTI3LjMxMyAyMTcuNTI4IDEyNy43MjIgMjE0Ljg4NCAxMjcuNDU2IDIxMS4wNjlDMTIxLjgxMiAxMzUuNzM5IDUxLjYxNjIgMTU4LjQ4OCAyNi4xNDE2IDE2NS4zQzM0LjI5NTEgMTkwLjAzNyA1My4zNjc4IDI2MC4zOSAxMjAuNDQgMjIzLjgzNlYyMjMuODM2WiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMTMyLjYwNyAzNTAuMTQ0QzEzMy44MjYgMzQ3LjAxNiAxMzQuNzQ3IDM0NC4wMTggMTM0LjUzMiAzNDIuNTM1QzEzNC4zMTcgMzQxLjA0MSAxMzMuMDQ3IDMzOC42OSAxMzAuNTM4IDMzNS43NzNDODAuNTUxNCAyNzguNTA5IDM3LjgyNzQgMzM3LjkxMiAyMS40NDg3IDM1OC4zMDlDNDIuOTI4NSAzNzMuNDI4IDEwMC43MSA0MTguODIzIDEzMi41OTYgMzUwLjE0NEgxMzIuNjA3WiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMjg3LjU3OCAxMjAuODIyQzI3NC40MjYgMTM1LjQ0NiAyMzUuNjE1IDE3NC4yNDEgMjgyLjI0MiAyMDUuODZDMjg0LjM5MyAyMDcuMTIyIDI4Ni40NzIgMjA4LjE1MSAyODcuNTc4IDIwOC4xNTFDMjg4LjY4NCAyMDguMTUxIDI5MC41MTggMjA3LjQ0NSAyOTIuODk1IDIwNS44NkMzMzkuNTMyIDE3NC4yNDEgMzAwLjczIDEzNS40MzYgMjg3LjU3OCAxMjAuODIyWiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMTU5LjE5NiAzODIuMzMzQzE1OC40NDggMzgxLjgxOCAxNTYuODYxIDM4MS40NDUgMTU0LjQ5NSAzODEuNDI1QzEwNy43ODYgMzgxLjIzMyAxMTUuNTYxIDQyNS41MTggMTE3LjQ4NyA0NDEuNTI1QzEzMy4zODQgNDM3LjcxIDE3OC4yMTggNDI5LjQwNCAxNjEuNzA2IDM4Ni4zNkMxNjAuODQ2IDM4NC41MTMgMTU5LjkzNCAzODIuODQ4IDE1OS4xODYgMzgyLjMzM0gxNTkuMTk2WiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMjgyLjI0MiAzMDYuNTAyQzI4NC4zOTMgMzA3Ljc2MyAyODYuNDcyIDMwOC43OTMgMjg3LjU3OCAzMDguNzkzQzI4OC42ODQgMzA4Ljc5MyAyOTAuNTE4IDMwOC4wODYgMjkyLjg5NCAzMDYuNTAyQzMzOS41MzEgMjc0Ljg4MiAzMDAuNzMgMjM2LjA3NyAyODcuNTc4IDIyMS40NjNDMjc0LjQyNiAyMzYuMDg3IDIzNS42MTUgMjc0Ljg4MiAyODIuMjQyIDMwNi41MDJaIiBmaWxsPSIjM0I1RURBIi8+CjxwYXRoIGQ9Ik04NS40Nzg4IDI4Mi45MzdDODYuOTQzNiAyODAuOTM5IDg4LjE3MjcgMjc4Ljk5MSA4OC4yNzUxIDI3Ny45MTFDODguMzc3NiAyNzYuODMxIDg3LjgyNDQgMjc0Ljk2NCA4Ni40NDE2IDI3Mi40OTJDNTguNjYyMyAyMjMuODg3IDE1Ljk1ODcgMjU4LjQ5NCAwIDI3MC4wOUMxMy42MDI4IDI4NC4zMSA0OS4zNTE3IDMyNS44NyA4NS40ODkzIDI4Mi45MzdIODUuNDc4OFoiIGZpbGw9IiMzQjVFREEiLz4KPHBhdGggZD0iTTEzMy41MzcgMTQ5LjEwMUMxMzYuMDM2IDE0OC45MyAxMzguMzQxIDE0OC42MDcgMTM5LjI0MiAxNDcuOTgxQzE0MC4xNDMgMTQ3LjM1NSAxNDEuMjUgMTQ1Ljc1MSAxNDIuMjg0IDE0My4xMTZDMTYyLjI3OSA5MC45Mjg4IDEwNy45MzkgODAuODc2OCA4OC42ODIyIDc2LjI2NDZDODYuMzQ2OCA5NS42NjIxIDc2Ljk0MzQgMTQ5LjM1MyAxMzMuNTQ3IDE0OS4xMDFIMTMzLjUzN1oiIGZpbGw9IiMzQjVFREEiLz4KPHBhdGggZD0iTTIxMC4wNzYgMTMyLjMxOEMyMTIuODMxIDEzMi43OTIgMjE1LjQzMyAxMzMuMDU0IDIxNi41OTEgMTMyLjYyMUMyMTcuNzQ4IDEzMi4xODcgMjE5LjM4NyAxMzAuNzMzIDIyMS4yMyAxMjguMTRDMjU3LjI4NiA3Ni43MTkgMjAwLjk0OSA1MS4zMTY2IDE4MS4yNjIgNDEuMTczN0MxNzMuMzk1IDYxLjY1MTEgMTQ4LjQ1MyAxMTcuNTIyIDIxMC4wNzYgMTMyLjMxOFYxMzIuMzE4WiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNMzQ5LjU0MiAyMzcuMzdDMzUwLjgxMiAyMzguMjA3IDM1My45NDYgMjM4LjY3MiAzNTcuMzM3IDIzOC45NTRDNDMzLjk3NiAyNDAuMzY3IDQxNy40NjQgMTY5LjM5OCA0MTIuOTM3IDE0My43NzNDMzg3LjE4NSAxNDkuNDg2IDMxNC4zMzYgMTYxLjcwNyAzNDUuMDg2IDIzMC45MDFDMzQ2LjY2NCAyMzQuMzkzIDM0OC4yNzIgMjM2LjU0MiAzNDkuNTQyIDIzNy4zOFYyMzcuMzdaIiBmaWxsPSIjM0I1RURBIi8+CjxwYXRoIGQ9Ik00NDggMjExLjA2NUM0NDcuNzM0IDIxNC44NzkgNDQ4LjE0MyAyMTcuNTI0IDQ0OC44NzEgMjE4Ljg0NkM0NDkuNTk4IDIyMC4xNjggNDUyLjE0OCAyMjIuMDM1IDQ1NS4wMTYgMjIzLjgzMkM1MjIuMDk4IDI2MC4zNzYgNTQxLjE3MSAxOTAuMDMyIDU0OS4zMTQgMTY1LjI5NkM1MjMuODM5IDE1OC40OTQgNDUzLjY0NCAxMzUuNzM1IDQ0OCAyMTEuMDY1VjIxMS4wNjVaIiBmaWxsPSIjM0I1RURBIi8+CjxwYXRoIGQ9Ik00NDQuODY4IDMzNS43NzNDNDQyLjM1OSAzMzguNjkgNDQxLjA4OSAzNDEuMDUxIDQ0MC44NzQgMzQyLjUzNUM0NDAuNjU5IDM0NC4wMTggNDQxLjU5IDM0Ny4wMTYgNDQyLjgwOSAzNTAuMTQ0QzQ3NC42OTYgNDE4LjgyMyA1MzIuNDc4IDM3My40MjggNTUzLjk1NyAzNTguMzA5QzUzNy41NzkgMzM3LjkxMiA0OTQuODY1IDI3OC41MDkgNDQ0Ljg2OCAzMzUuNzczVjMzNS43NzNaIiBmaWxsPSIjM0I1RURBIi8+CjxwYXRoIGQ9Ik00MjAuOTIzIDM4MS40MDhDNDE4LjU1NyAzODEuNDI4IDQxNi45NjkgMzgxLjgxMSA0MTYuMjIyIDM4Mi4zMTZDNDE1LjQ3NCAzODIuODIxIDQxNC41NjIgMzg0LjQ4NiA0MTMuNzAyIDM4Ni4zNDNDMzk3LjIgNDI5LjM4NyA0NDIuMDI0IDQzNy42OTMgNDU3LjkyMSA0NDEuNTA4QzQ1OS44NDcgNDI1LjUxMSA0NjcuNjIxIDM4MS4yMTYgNDIwLjkxMyAzODEuNDA4SDQyMC45MjNaIiBmaWxsPSIjM0I1RURBIi8+CjxwYXRoIGQ9Ik00ODguOTkxIDI3Mi41MDJDNDg3LjU5OCAyNzQuOTc0IDQ4Ny4wNTUgMjc2Ljg0MSA0ODcuMTU4IDI3Ny45MjFDNDg3LjI2IDI3OS4wMDEgNDg4LjQ3OSAyODAuOTQ5IDQ4OS45NTQgMjgyLjk0N0M1MjYuMDkyIDMyNS44NyA1NjEuODQgMjg0LjMyIDU3NS40NDMgMjcwLjA5OUM1NTkuNDg0IDI1OC41MTMgNTE2Ljc4MSAyMjMuOTA3IDQ4OS4wMDIgMjcyLjUwMkg0ODguOTkxWiIgZmlsbD0iIzNCNUVEQSIvPgo8cGF0aCBkPSJNNDM2LjE4NSAxNDcuOTgxQzQzNy4wODYgMTQ4LjU5NiA0MzkuMzkxIDE0OC45MTkgNDQxLjg5IDE0OS4xMDFDNDk4LjQ5MyAxNDkuMzUzIDQ4OS4wOTEgOTUuNjYyMSA0ODYuNzU1IDc2LjI2NDZDNDY3LjQ5OCA4MC44NzY4IDQxMy4xNDggOTAuOTM4OSA0MzMuMTUzIDE0My4xMTZDNDM0LjE3NyAxNDUuNzUxIDQzNS4yODMgMTQ3LjM2NSA0MzYuMTk1IDE0Ny45ODFINDM2LjE4NVoiIGZpbGw9IiMzQjVFREEiLz4KPHBhdGggZD0iTTM1OC44NDIgMTMyLjYyMUMzNTkuOTk5IDEzMy4wNTQgMzYyLjU5MSAxMzIuNzkyIDM2NS4zNTcgMTMyLjMxOEM0MjYuOTc5IDExNy41MjIgNDAyLjAzNyA2MS42NDExIDM5NC4xNzEgNDEuMTczN0MzNzQuNDk0IDUxLjMxNjYgMzE4LjE1NiA3Ni43MTkgMzU0LjIwMiAxMjguMTRDMzU2LjA0NiAxMzAuNzMzIDM1Ny42ODQgMTMyLjE4NyAzNTguODQyIDEzMi42MjFWMTMyLjYyMVoiIGZpbGw9IiMzQjVFREEiLz4KPC9zdmc+Cg==" />
+  <span class="title">YNAB</span>
+  <span class="instance">Monthly Budget</span>
+</div>
+
+<script>
+  const weekdaysInMonth = (weekday) => {
+    // Don't rely on JS to handle timezones properly, since things are rendered on the server
+    // Handle everything in UTC and calculate the offset manually based on the user variables
+    const systemTime = parseFloat("{{ trmnl.system.timestamp_utc }}");
+    const userUtcOffset = parseFloat("{{ trmnl.user.utc_offset }}");
+    const today = new Date((systemTime + userUtcOffset) * 1000);
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    let count = 0;
+    let currentDate = firstDay;
+
+    while (currentDate <= lastDay) {
+      if (currentDate.getDay() === weekday) {
+        count++;
+      }
+      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+    }
+
+    return count;
+  }
+
+  document.addEventListener("DOMContentLoaded", function(e) {
+    for (let i = 0; i < 6; i++) {
+      const weekdayOccurences = weekdaysInMonth(i);
+      const barSegmentDivs = document.getElementsByClassName(`bar-segments-${i}`);
+
+      for (let i = 0; i < barSegmentDivs.length; i++) {
+        barSegmentDivs[i].style["background-size"] = `${100 / weekdayOccurences}% 100%`;
+      }
+    }
+  });
+</script>
