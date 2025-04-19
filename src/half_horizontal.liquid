@@ -2,7 +2,7 @@
   {% assign showCategories = trmnl.plugin_settings.custom_fields_values.categories_to_show | split: "," %}
 
   {% if data.category_groups.size > 0 %}
-  <div class="grid grid--cols-2">
+  <div class="grid grid--cols-4">
     {% assign displayed = 0 %}
     {% for group in data.category_groups %}
     {% for category in group.categories %}
@@ -16,7 +16,15 @@
     {% assign activity = category.activity | times: 1.0 %}
     {% assign spent = activity | times: -1 %}
 
-    {% assign hasGoal = category.goal_type != null %}
+    {% comment %}
+    For some reason sometimes a category will have a goal_type but no goal_overall_funded.
+    If that happens we don't have any data to track funding progress so just don't show a goal.
+    {% endcomment %}
+    {% if category.goal_type != null and category.goal_overall_funded != null %}
+      {% assign hasGoal = true %}
+    {% else %}
+      {% assign hasGoal = false %}
+    {% endif %}
     {% assign goalCadence = category.goal_cadence %}
     {% assign goalDay = category.goal_day %}
     {% assign goalPctComplete = category.goal_percentage_complete %}
@@ -63,17 +71,20 @@
       </div>
 
       <div>
-        {% if goalPctComplete == 100 %}
-        <div class="label label--small">{% if spentPct > 0 %}{{ spent | divided_by: 1000 | number_to_currency }} / {{ funded | divided_by: 1000 | number_to_currency }}{% else %}Funded{% endif %}</div>
+        {% if hasGoal %}
+          {% if goalPctComplete == 100 %}
+          <div class="label label--small">{% if spentPct > 0 %}{{ spent | divided_by: 1000 | number_to_currency }} / {{ funded | divided_by: 1000 | number_to_currency }}{% else %}Funded{% endif %}</div>
+          {% else %}
+            {% if category.goal_type == 'NEED' %}
+             <div class="label label--small">{{ goalUnderFunded | divided_by: 1000 | number_to_currency }} short this month</div>
+            {% elsif category.goal_type == 'TBD' %}
+              <div class="label label--small">On Track</div>
+            {% elsif category.goal_type == 'TB' %}
+              <div class="label label--small">{{ goalOverallLeft | divided_by: 1000 | number_to_currency }} short</div>
+            {% endif %}
+          {% endif %}
         {% else %}
-        {% if category.goal_type == 'NEED' %}
-        <div class="label label--small">{{ goalUnderFunded | divided_by: 1000 | number_to_currency }} short this month</div>
-        {% elsif category.goal_type == 'TBD' %}
-        <div class="label label--small">On Track</div>
-        {% elsif category.goal_type == 'TB' %}
-        <div class="label label--small">{{ goalOverallLeft | divided_by: 1000 | number_to_currency }} short</div>
-        {% else %}
-        {% endif %}
+          <div class="label label--small">Spent {{ spent | divided_by: 1000 | number_to_currency }} of {{ category.budgeted | times: 1.0 | divided_by: 1000 | number_to_currency }}</div>
         {% endif %}
       </div>
     </div>

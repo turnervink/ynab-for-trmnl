@@ -3,9 +3,10 @@ strategy: polling
 no_screen_padding: 'no'
 dark_mode: 'no'
 static_data: ''
-polling_verb: ''
+polling_verb: 'GET'
 polling_url: https://api.ynab.com/v1/budgets/{{ynab_budget_id}}/categories?access_token={{ynab_api_key}}
 polling_headers: ''
+id: 13998
 custom_fields:
 - keyname: ynab_api_key
   field_type: string
@@ -15,16 +16,12 @@ custom_fields:
 - keyname: ynab_budget_id
   field_type: string
   name: Budget ID
-  description: The ID of the budget to display. This will be in the URL of your browser
-    when you open the budget in YNAB.
+  description: The ID of the budget to display. This will be in the URL of your browser when you open the budget in YNAB.
   placeholder: 61916b33-a9c5-45f0-9508-e4f26402a947
 - keyname: categories_to_show
   field_type: string
   name: Category IDs
-  description: Enter the IDs of the budget categories you want to display separated
-    by commas. Obtain the IDs from https://api.ynab.com/v1/budgets/BUDGET_ID/categories?access_token=YNAB_API_KEY.
-    Categories will be displayed in the order they appear in your YNAB app. in the
-    order they appear in your YNAB app.
+  description: Enter the IDs of the budget categories you want to display separated by commas. Obtain the IDs from https://api.ynab.com/v1/budgets/BUDGET_ID/categories?access_token=YNAB_API_KEY. Categories will be displayed in the order they appear in your YNAB app. in the order they appear in your YNAB app.
   placeholder: 266e8839-08b1-49da-91b3-a31b1c45a76a,b701b434-71af-4f56-9794-63b673e71dd4,fce92b8a-9931-4373-97cb-a522a14f0a97
 name: YNAB Monthly Budget
 refresh_interval: 360

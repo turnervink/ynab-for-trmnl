@@ -1,0 +1,23 @@
+- Left bar: What percentage of the funding this month has been spent?
+	- How do we know the spending?  - activity
+	- How do we know how much has been funded this month so we can substruct the spending? - goal_overall_funded shows how much money the fully funded goal is
+		- What if there's no goal? - Use the balance to know how much money there is
+			- What if there was some rollover? - Use the balance to know how much money there is
+		- What if more than the goal has been funded? - Goal funded % is 100, goal_overall_funded shows how much is in the balance including the extra
+- Right bar: How much is left until the goal is fully funded?
+	- How do we know this progress? -> goal_percentage_complete
+
+
+- Check `goal_type` to see if there's a goal
+- If there's a goal use `goal_percentage_complete` to build the funded bar and `goal_overall_funded` to know how much money has been funded
+	- Use `goal_under_funded` to know how much more is needed this month
+- If there's no goal show a full funding bar and use the `balance` to know how much money has been funded
+- In all cases use `activity` to know how much has been spent
+
+Captions
+- If `goal_percentage_complete` is 100 show "Funded" and add any spending on to the end
+- Else
+	- If the goal is a NEED show "goal_under_funded more needed this month"
+	- If the goal is a TBD show "On track"
+	- If the goal is a TB show "goal_overall_left more needed eventually"
+	- If the goal is MF (or anything else) show nothing, I can't find examples

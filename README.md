@@ -6,16 +6,14 @@ Started from the [trmnl_preview](https://github.com/schrockwell/trmnl_preview) d
 
 ## Running
 
-If you have Docker installed:
+Create `.trmnlp.yml` in the root of the project and set the following variables under `custom_fields`:
+- `ynab_api_key`
+- `ynab_budget_id`
+- `categories_to_show`
 
+
+Start the server:
 ```sh
-./bin/serve
-```
-
-Otherwise:
-
-```sh
-bundle install
 trmnlp serve
 ```
 
